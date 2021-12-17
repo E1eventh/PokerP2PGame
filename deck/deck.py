@@ -1,6 +1,6 @@
 from collections.abc import Callable
 
-from Card.card import Card
+from card.card import Card
 
 
 class Deck:
