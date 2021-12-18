@@ -1,7 +1,7 @@
 from collections.abc import Callable
 
-from player.player import Player
-from deck.deck import Deck
+from game_logic.player.player import Player
+from game_logic.deck.deck import Deck
 
 
 class Table:
@@ -27,11 +27,12 @@ class Table:
         self.bank += amount
 
     def move_players_order(self):
-        self.players_order = self.players_order.insert(len(self.players_order) - 1, self.players_order.pop(0))
+        self.players_order.insert(len(self.players_order) - 1, self.players_order.pop(0))
 
     def delete_the_player(self, player_index):
-        del self.players[player_index]
+        print(player_index)
         self.players_order.remove(player_index)
+        del self.players[player_index]
 
     def delete_bankrupts(self):
         for player in self.players.values():

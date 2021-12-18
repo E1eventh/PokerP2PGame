@@ -1,6 +1,6 @@
 from collections.abc import Callable
 
-from card.card import Card
+from game_logic.card.card import Card
 
 
 class Deck:

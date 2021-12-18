@@ -1,4 +1,4 @@
-from card.card import Card
+from game_logic.card.card import Card
 
 
 class Player:
@@ -44,4 +44,7 @@ class Player:
         self.hand = new_hand
 
     def change_bankroll(self, bankroll: int):
-        self.bankroll += bankroll
+        if self.bankroll + bankroll > 0:
+            self.bankroll += bankroll
+        else:
+            self.bankroll = 0
