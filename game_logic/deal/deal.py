@@ -15,7 +15,7 @@ class Deal:
         self.finished_turn_players = 0
 
     def get_current_player(self):
-        return self.deal.players_order[self.deal.player_pointer]
+        return self.players_order[self.player_pointer]
 
     def move_pointer(self):
         self.player_pointer += 1

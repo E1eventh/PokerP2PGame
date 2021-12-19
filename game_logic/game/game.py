@@ -5,15 +5,16 @@ from game_logic.table.table import Table
 from game_logic.deal.deal import Deal
 from client_server.sharedData import SharedData
 
+from game_logic.combinations.combinations import get_strongest_combination
+
 
 class Game:
     """Класс игры"""
     def __init__(self, current_player_id: str, data: SharedData):
         """
         Конструктор класса игры
-        :param game_seed: seed для псевдорандомного генератора
-        :param players: список игроков
-        :param balance: начальный баланс игроков
+        :param current_player_id: id текущего игрока
+        :param data: клиентские данные для взаимодействия игроков
         """
         # Устанавливаем сид
         seed(data.seed)
@@ -43,7 +44,6 @@ class Game:
 
     #     # Создаём новую раздачу
     #     self.deal = Deal(self.table.players_order)
-
 
     # Phases
     def preflop(self):
@@ -94,7 +94,6 @@ class Game:
 
         # Выкладывание карты на стол
         self.table.board.append(self.table.deck.pop_card())
-
 
     # Actions
     def fold(self, player_id):
@@ -171,13 +170,6 @@ class Game:
         self.deal.set_player_bet(player_id, bet)
         return True
 
-    # Есть в Table
-    # def delete_bankrupts(self):
-    #     """Удаляем банкротов из игры"""
-    #     for player in self.table.players:
-    #         if player.is_bankrupt:
-    #             self.table.delete_the_player(player)
-
     def round_end(self):
         for player in self.deal.players_order:
             bet = self.deal.get_player_bet(player)
@@ -200,9 +192,6 @@ class Game:
             # Я хожу или другой игрок?
             my_turn = current_player == self.current_player_id
 
-            # Переменные для обработки хода, заполняются дальше
-            player_action = ''
-            player_bet = 0
             # Нужно ли сдвигать  очердь хода?
             # Вообще нужно, если удалили игрока, то другая логика
             is_move_ptr = True
@@ -211,7 +200,6 @@ class Game:
             print(f"MAX BET: {self.deal.get_max_bet()}")
             # Print the hand
             print(f'board: {[(card.value, card.suit) for card in self.table.board]}')
-            
 
             # Сообщение, которое отправляем, а заодно и флаг
             method_with_args = ""
@@ -271,7 +259,7 @@ class Game:
             # Если мы сфолдили, то мы все
             if self.current_player_id not in self.table.players:
                 return -1
-            
+
             if is_move_ptr:
                 print("MOVING PTR")
                 self.deal.move_pointer()
@@ -284,3 +272,24 @@ class Game:
         self.deal.finished_turn_players = 0
 
         return len(self.table.players_order)
+
+    def __players_combinations(self):
+        players_combinations = {}
+
+        for player in self.deal.players_order:
+            players_cards = self.table.players[player].hand + self.table.board
+
+            players_combinations[player] = get_strongest_combination(players_cards)
+
+        return players_combinations
+
+    def define_the_winner(self):
+        players_combinations = self.__players_combinations()
+
+        strongest_combination = max(players_combinations.values())
+
+        for key, value in players_combinations.items():
+            if value[0] < strongest_combination:
+                del players_combinations[key]
+
+        return players_combinations

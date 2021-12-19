@@ -19,7 +19,7 @@ class Table:
         # Банк на столе
         self.bank = 0
         self.board = []
-        self.active = {p:True for p in players}
+        self.active = {player: True for player in players}
 
     def increase_bank(self, amount: int):
         self.bank += amount
