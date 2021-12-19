@@ -24,23 +24,30 @@ def is_straith_here(straith_cards: list[int]):
     straith_here = False
     straith = (0, 0)
 
+    if len(straith_cards) < 5:
+        return straith_here, straith
+
     if len(straith_cards) == 7:
         if straith_cards[6] - straith_cards[2] == 4:
             straith_here = True
             straith = (straith_cards[2], straith_cards[6])
-        if straith_cards[6] - straith_cards[3] == 9:
+        elif straith_cards[6] - straith_cards[3] == 9:
             smallest_straith = True
         straith_cards = straith_cards[:6]
 
-    if len(straith_cards) == 6:
+    if len(straith_cards) == 6 and not straith_here:
         if straith_cards[5] - straith_cards[1] == 4:
             straith_here = True
             straith = (straith_cards[1], straith_cards[5])
+        elif straith_cards[5] - straith_cards[3] == 9:
+            smallest_straith = True
         straith_cards = straith_cards[:5]
 
-    if straith_cards[4] - straith_cards[0] == 4:
+    if straith_cards[4] - straith_cards[0] == 4 and not straith_here:
         straith_here = True
         straith = (straith_cards[0], straith_cards[4])
+    elif straith_cards[4] - straith_cards[3] == 9:
+        smallest_straith = True
 
     if not straith_here and smallest_straith:
         straith_here = True
@@ -50,12 +57,12 @@ def is_straith_here(straith_cards: list[int]):
 
 
 def is_some_of_a_kind_here(cards: list[Card], counter, excluded_card=None):
-    cards_values = [card.value for card in cards if card != excluded_card]
+    cards_values = [card.value for card in cards if card.value != excluded_card]
 
-    uniq_card_values = list(set(cards_values))
+    uniq_card_values = sorted(list(set(cards_values)))
     uniq_card_values.reverse()
 
-    for uniq_card in set(uniq_card_values):
+    for uniq_card in uniq_card_values:
         if cards_values.count(uniq_card) == counter:
             return True, uniq_card
 
@@ -74,10 +81,11 @@ def is_royal_flush(cards: list[Card]):
 
 
 def is_straight_flush(cards: list[Card], possible_cards: list[int], flush: list):
-    straith_here, straith = is_straith_here(list(set(possible_cards)))
+    if flush[0]:
+        straith_here, straith = is_straith_here(list(set(possible_cards)))
 
-    if possible_cards:
-        return [8, 'Straith Flush', straith, flush[1]]
+        if straith_here:
+            return [8, 'Straith Flush', straith, flush[1]]
 
     return is_four_of_the_kind(cards)
 
@@ -147,4 +155,10 @@ def is_pair(cards: list[Card]):
 
 
 def is_kicker(cards: list[Card]):
-    return [0, 'Kicker', sorted([card.value for card in cards])[:-1]]
+    return [0, 'Kicker', sorted([card.value for card in cards])[-1]]
+
+
+if __name__ == '__main__':
+    cards = [Card(2, 'H'), Card(3, 'H'), Card(4, 'H'), Card(5, 'H'), Card(13, 'H'), Card(14, 'H'), Card(9, 'H')]
+
+    print(get_strongest_combination(cards))
