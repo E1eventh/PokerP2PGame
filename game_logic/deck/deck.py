@@ -20,13 +20,13 @@ class Deck:
 
     # Методы
     @staticmethod
-    def __shuffled_deck(shuffle_func: Callable):
+    def __shuffle_deck(shuffle_func: Callable):
         new_deck = [Card(value, suit) for suit in ['H', 'D', 'C', 'S'] for value in range(2, 15)]
         shuffle_func(new_deck)
         return new_deck
 
     def update_deck(self):
-        self.current_deck = self.__shuffled_deck(self.shuffle_func)
+        self.current_deck = self.__shuffle_deck(self.shuffle_func)
 
-    def pop_card_from_deck(self):
+    def pop_card(self):
         return self.current_deck.pop(0)

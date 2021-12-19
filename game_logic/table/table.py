@@ -16,8 +16,10 @@ class Table:
         self.players = {player: Player(start_player_balance) for player in players}
         self.players_order = players
         self.deck = Deck(shuffle_func)
+        # Банк на столе
         self.bank = 0
         self.board = []
+        self.active = {p:True for p in players}
 
     def increase_bank(self, amount: int):
         self.bank += amount
@@ -33,7 +35,7 @@ class Table:
         if idx >= len(self.players_order):
             need_move = True
         self.players_order.remove(player_index)
-        # TODO нужно удалять?
+        del self.active[player_index]
         del self.players[player_index]
         return need_move
 
@@ -41,3 +43,9 @@ class Table:
         for player in self.players.values():
             if player.is_bankrupt:
                 self.delete_the_player(player)
+
+    def is_active(self, player):
+        return self.active[player]
+
+    def set_active(self, player, val):
+        self.active[player] = val

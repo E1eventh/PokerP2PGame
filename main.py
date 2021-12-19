@@ -24,7 +24,13 @@ if __name__ == "__main__":
 
 
   try:
-    # TODO: pass only data object
+    
+    # Убрать блайнды
+    # Fold - не падать - для игрока - конец игры (можно наблюдать)
+    # Raise n - поднять свою ставку до n
+    # Check - нельзя чекать, если твоя ставка не равна максимальной
+    # Call - убрать аргументы - сравнивает текущую ставку с максимальной
+
     game = Game(f'{address[0]}:{address[1]}', data)
 
     for street in ['preflop', 'flop', 'turn', 'river']:
