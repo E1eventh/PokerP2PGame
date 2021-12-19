@@ -106,13 +106,13 @@ class Game:
         # self.table.set_active(player_id, False)
         # self.table.delete_the_player()
         # TODO: fix this
-        self.table.delete_the_player(player_id)
-        return True
+        del self.deal.players_bet[player_id]
+        return self.table.delete_the_player(player_id)
 
     def check(self, player_id):
         """Пропуск ставки игроком"""
         # TODO: check if player can check...
-        if self.deal.get_max_bet() != self.deal.get_player_bet(player_id):
+        if self.deal.get_max_bet() > self.deal.get_player_bet(player_id):
             # print("not checked")
             return False
         self.deal.finished_turn_players += 1
@@ -179,23 +179,11 @@ class Game:
     #             self.table.delete_the_player(player)
 
     def round_end(self):
-        # Если мы сфолдили, то мы все
-        if not self.table.is_active(self.current_player_id):
-            return True
-
-        # Если мы не сфолдили, то на остальных смотрим
-        # tmp = []
         for player in self.deal.players_order:
             bet = self.deal.get_player_bet(player)
             self.deal.set_player_bet(player, 0)
             self.table.players[player].change_bankroll(-bet)
             self.table.increase_bank(bet)
-            # if not self.table.is_active(player):
-            #     tmp.append()
-        
-        # for p in tmp:
-        #     if self.table.delete_the_player(p):
-        #         self.deal.move_pointer()
 
         self.deal.player_pointer = 0
 
@@ -204,6 +192,9 @@ class Game:
 
     def betting_round(self):
         while not self.deal.is_all_players_finished():
+            if len(self.table.players) < 2:
+                return 1
+
             current_player = self.deal.players_order[self.deal.player_pointer]
 
             # Я хожу или другой игрок?
@@ -229,6 +220,7 @@ class Game:
                 # Из ввода, если хожу я
                 # От другого клиента, если хожу не я
                 if my_turn:
+                    print("YOUR TURN!")
                     print(f'Hand: {[(card.value, card.suit) for card in self.table.players[current_player].hand]}')
                     print(f'Your bet: {self.deal.get_player_bet(current_player)}')
                     print(f'Your bank: {self.table.players[current_player].bankroll}')
@@ -257,8 +249,8 @@ class Game:
                     if self.bet(current_player, player_bet):
                         method_with_args = f'raise {current_player} {player_bet}'
                 elif player_action == 'fold':
-                    if self.fold(current_player):
-                        method_with_args = f'fold {current_player}'
+                    is_move_ptr = self.fold(current_player)
+                    method_with_args = f'fold {current_player}'
                 elif player_action == 'check':
                     if self.check(current_player):
                         method_with_args = f'check'
@@ -275,9 +267,16 @@ class Game:
             if my_turn:
                 # print("SENDING ACTION")
                 self.data.send_action(method_with_args, current_player)
+
+            # Если мы сфолдили, то мы все
+            if self.current_player_id not in self.table.players:
+                return -1
+            
             if is_move_ptr:
-                # print("MOVING PTR")
+                print("MOVING PTR")
                 self.deal.move_pointer()
+
+            print(f"POINTER: {self.deal.player_pointer}")
 
         if self.round_end():
             return -1

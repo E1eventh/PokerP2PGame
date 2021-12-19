@@ -32,7 +32,7 @@ class Table:
         need_move = False
         # ValueIndex exception
         idx = self.players_order.index(player_index)
-        if idx >= len(self.players_order):
+        if idx >= len(self.players_order) - 1:
             need_move = True
         self.players_order.remove(player_index)
         del self.active[player_index]
