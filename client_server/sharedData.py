@@ -86,7 +86,7 @@ class SharedData:
     def get_action(self, player_id):
         while True:
             try:
-                res = self.queue.get(timeout=10)
+                res = self.queue.get(timeout=2)
             except Empty as empty:
                 try:
                     proxy = ServerProxy(f"http://{player_id}")

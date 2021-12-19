@@ -25,7 +25,7 @@ if __name__ == "__main__":
 
   try:
     
-    # Убрать блайнды
+    # Убрать блайнды +
     # Fold - не падать - для игрока - конец игры (можно наблюдать)
     # Raise n - поднять свою ставку до n
     # Check - нельзя чекать, если твоя ставка не равна максимальной
@@ -33,6 +33,7 @@ if __name__ == "__main__":
 
     game = Game(f'{address[0]}:{address[1]}', data)
 
+    res = 0
     for street in ['preflop', 'flop', 'turn', 'river']:
         print(f'\n\n{street.capitalize()}')
 
@@ -46,10 +47,15 @@ if __name__ == "__main__":
         #   print(card.value, card.suit)
         
         # Action
-        game.betting_round()
+        res = game.betting_round()
+        if res < 0:
+          break
 
     # TODO: print winner
-    print("Who won?")
+    if res < 0:
+      print("You lose!")
+    else:
+      print("Who won?")
     # game.start_new_deal()
 
 
