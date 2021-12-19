@@ -225,7 +225,6 @@ class Game:
                     method_with_args = f'delete {current_player}'
                 else:
                     print("Wrong action. Try again.")
-                
 
 
             # Посылаем всем, если мой ход

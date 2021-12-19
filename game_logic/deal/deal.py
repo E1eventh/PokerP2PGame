@@ -35,7 +35,7 @@ class Deal:
         return self.players_bet[player_id]
 
     def get_max_bet(self):
-        return max(self.players_bet.values)
+        return max(self.players_bet.values())
 
     def delete_player_from_deal(self, player_id):
         self.players_order.remove(player_id)
