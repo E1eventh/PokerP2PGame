@@ -2,10 +2,21 @@ from game_logic.card.card import Card
 
 
 def get_strongest_combination(cards: list[Card]):
+    """
+    Функция по поиску сильнейшей комбинации из набора переданных карт
+    :param cards: набор карт
+    :return: сильнейшая комбинация
+    """
     return is_royal_flush(sorted(cards))
 
 
 def is_flush_here(flush_cards: list[Card]):
+    """
+    Функция, проверяющая, что в наборе переданых карт есть флеш
+    :param flush_cards: набор карт
+    :return flush_cards: флаг наличия флеша
+    :return suit: масть, формирующая флеш
+    """
     suits = [card.suit for card in flush_cards]
     uniq_suits = list(set(suits))
 
@@ -19,44 +30,60 @@ def is_flush_here(flush_cards: list[Card]):
     return False, ''
 
 
-def is_straith_here(straith_cards: list[int]):
-    smallest_straith = False
-    straith_here = False
-    straith = (0, 0)
+def is_straight_here(straight_cards: list[int]):
+    """
+    Функция, проверяющая, что в наборе переданных карт есть стрит
+    :param straight_cards: набор карт
+    :return straight_here:
+    :return straight_here: флаг наличия стрита
+    :return straight: карты, формирубщий стрит
+    """
+    smallest_straight = False
+    straight_here = False
+    straight = (0, 0)
 
-    if len(straith_cards) < 5:
-        return straith_here, straith
+    if len(straight_cards) < 5:
+        return straight_here, straight
 
-    if len(straith_cards) == 7:
-        if straith_cards[6] - straith_cards[2] == 4:
-            straith_here = True
-            straith = (straith_cards[2], straith_cards[6])
-        elif straith_cards[6] - straith_cards[3] == 9:
-            smallest_straith = True
-        straith_cards = straith_cards[:6]
+    if len(straight_cards) == 7:
+        if straight_cards[6] - straight_cards[2] == 4:
+            straight_here = True
+            straight = (straight_cards[2], straight_cards[6])
+        elif straight_cards[6] - straight_cards[3] == 9:
+            smallest_straight = True
+        straight_cards = straight_cards[:6]
 
-    if len(straith_cards) == 6 and not straith_here:
-        if straith_cards[5] - straith_cards[1] == 4:
-            straith_here = True
-            straith = (straith_cards[1], straith_cards[5])
-        elif straith_cards[5] - straith_cards[3] == 9:
-            smallest_straith = True
-        straith_cards = straith_cards[:5]
+    if len(straight_cards) == 6 and not straight_here:
+        if straight_cards[5] - straight_cards[1] == 4:
+            straight_here = True
+            straight = (straight_cards[1], straight_cards[5])
+        elif straight_cards[5] - straight_cards[3] == 9:
+            smallest_straight = True
+        straight_cards = straight_cards[:5]
 
-    if straith_cards[4] - straith_cards[0] == 4 and not straith_here:
-        straith_here = True
-        straith = (straith_cards[0], straith_cards[4])
-    elif straith_cards[4] - straith_cards[3] == 9:
-        smallest_straith = True
+    if straight_cards[4] - straight_cards[0] == 4 and not straight_here:
+        straight_here = True
+        straight = (straight_cards[0], straight_cards[4])
+    elif straight_cards[4] - straight_cards[3] == 9:
+        smallest_straight = True
 
-    if not straith_here and smallest_straith:
-        straith_here = True
-        straith = (14, 5)
+    if not straight_here and smallest_straight:
+        straight_here = True
+        straight = (14, 5)
 
-    return straith_here, straith
+    return straight_here, straight
 
 
 def is_some_of_a_kind_here(cards: list[Card], counter, excluded_card=None):
+    """
+    Функция, проверяющая, что в наборе переданных карт есть заданное
+    число карт одного достоинства
+    :param cards: набор карт
+    :param counter: количество искомых карт одного достоинства
+    :param excluded_card: карта, которую нужно исключить из набора карт
+    :return some_of_a_kind_here: флаг наличия заданного числа карт одного достоинтсва
+    :return value: достоинство карты, который содержитсся необходимое количество
+    """
     cards_values = [card.value for card in cards if card.value != excluded_card]
 
     uniq_card_values = sorted(list(set(cards_values)))
@@ -70,6 +97,11 @@ def is_some_of_a_kind_here(cards: list[Card], counter, excluded_card=None):
 
 
 def is_royal_flush(cards: list[Card]):
+    """
+    Проверка на наличии комбинации "Флеш Рояль" в заданном наборе карт
+    :param cards: набор карт
+    :return: list - сила комбинации, название и её карты
+    """
     flush_here, flush_suit = is_flush_here(cards)
     possible_cards = [card.value for card in cards if card.suit == flush_suit]
 
@@ -81,16 +113,28 @@ def is_royal_flush(cards: list[Card]):
 
 
 def is_straight_flush(cards: list[Card], possible_cards: list[int], flush: list):
+    """
+    Проверка на наличии комбинации "Стрит Флеш" в заданном наборе карт
+    :param cards: набор карт
+    :param possible_cards: список возможных карт для заданной комбинации
+    :param flush: данные о картах, из которых формируется флеш
+    :return: list - сила комбинации, название и её карты
+    """
     if flush[0]:
-        straith_here, straith = is_straith_here(list(set(possible_cards)))
+        straight_here, straight = is_straight_here(list(set(possible_cards)))
 
-        if straith_here:
-            return [8, 'Straith Flush', straith, flush[1]]
+        if straight_here:
+            return [8, 'straight Flush', straight, flush[1]]
 
     return is_four_of_the_kind(cards)
 
 
 def is_four_of_the_kind(cards: list[Card]):
+    """
+    Проверка на наличии комбинации "Каре" в заданном наборе карт
+    :param cards: набор карт
+    :return: list - сила комбинации, название и её карты
+    """
     four_of_the_kind_here, uniq_card = is_some_of_a_kind_here(cards, 4)
     if four_of_the_kind_here:
         return [7, 'Four of the Kind', uniq_card]
@@ -99,6 +143,11 @@ def is_four_of_the_kind(cards: list[Card]):
 
 
 def is_full_house(cards: list[Card]):
+    """
+    Проверка на наличии комбинации "Фулл Хаус" в заданном наборе карт
+    :param cards: набор карт
+    :return: list - сила комбинации, название и её карты
+    """
     three_of_the_kind_here, three_of_the_kind_uniq_card = is_some_of_a_kind_here(cards, 3)
     two_of_the_kind_here, two_of_the_kind_uniq_card = is_some_of_a_kind_here(cards, 2)
 
@@ -109,6 +158,11 @@ def is_full_house(cards: list[Card]):
 
 
 def is_flush(cards: list[Card]):
+    """
+    Проверка на наличии комбинации "Флеш" в заданном наборе карт
+    :param cards: набор карт
+    :return: list - сила комбинации, название и её карты
+    """
     flush_here, flush_suit = is_flush_here(cards)
 
     if flush_here:
@@ -118,15 +172,25 @@ def is_flush(cards: list[Card]):
 
 
 def is_straight(cards: list[Card]):
-    straith_here, straith = is_straith_here(list(set([card.value for card in cards])))
+    """
+    Проверка на наличии комбинации "Стрит" в заданном наборе карт
+    :param cards: набор карт
+    :return: list - сила комбинации, название и её карты
+    """
+    straight_here, straight = is_straight_here(list(set([card.value for card in cards])))
 
-    if straith_here:
-        return [4, 'Straith', straith]
+    if straight_here:
+        return [4, 'straight', straight]
 
     return is_three_of_a_kind(cards)
 
 
 def is_three_of_a_kind(cards: list[Card]):
+    """
+    Проверка на наличии комбинации "Сет" в заданном наборе карт
+    :param cards: набор карт
+    :return: list - сила комбинации, название и её карты
+    """
     three_of_the_kind_here, uniq_card = is_some_of_a_kind_here(cards, 3)
 
     if three_of_the_kind_here:
@@ -136,6 +200,11 @@ def is_three_of_a_kind(cards: list[Card]):
 
 
 def is_two_pair(cards: list[Card]):
+    """
+    Проверка на наличии комбинации "Две пары" в заданном наборе карт
+    :param cards: набор карт
+    :return: list - сила комбинации, название и её карты
+    """
     two_of_the_kind_here, first_uniq_card = is_some_of_a_kind_here(cards, 2)
     two_of_the_kind_here, second_uniq_card = is_some_of_a_kind_here(cards, 2, first_uniq_card)
 
@@ -146,6 +215,11 @@ def is_two_pair(cards: list[Card]):
 
 
 def is_pair(cards: list[Card]):
+    """
+    Проверка на наличии комбинации "Пара" в заданном наборе карт
+    :param cards: набор карт
+    :return: list - сила комбинации, название и её карты
+    """
     two_of_the_kind_here, uniq_card = is_some_of_a_kind_here(cards, 2)
 
     if two_of_the_kind_here:
@@ -155,10 +229,9 @@ def is_pair(cards: list[Card]):
 
 
 def is_kicker(cards: list[Card]):
+    """
+    Проверка на наличии комбинации "Старшая карта" в заданном наборе карт
+    :param cards: набор карт
+    :return: list - сила комбинации, название и её карты
+    """
     return [0, 'Kicker', sorted([card.value for card in cards])[-1]]
-
-
-if __name__ == '__main__':
-    cards = [Card(2, 'H'), Card(3, 'H'), Card(4, 'H'), Card(5, 'H'), Card(13, 'H'), Card(14, 'H'), Card(9, 'H')]
-
-    print(get_strongest_combination(cards))

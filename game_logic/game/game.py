@@ -27,36 +27,10 @@ class Game:
 
         # Инициализируем раздачу
         self.deal = Deal(data.players)
-        # Блайнды
-        # self.big_blind = int(data.balance / 100)
-        # self.small_blind = int(self.big_blind / 2)
-        # Минимальная возможная ставка
-        # self.min_bet = 0
-        # self.min_bet = self.big_blind
-
-    # def start_new_deal(self):
-    #     """Начало новой раздачи"""
-    #     # Удаляем ссылку на предудщий экземпляр класса раздачи
-    #     del self.deal
-
-    #     self.table.move_players_order()
-    #     self.table.delete_bankrupts()
-
-    #     # Создаём новую раздачу
-    #     self.deal = Deal(self.table.players_order)
 
     # Phases
     def preflop(self):
         """Раздача карт игрокам"""
-        # self.deal.set_player_bet(self.deal.get_current_player(), self.small_blind)
-        # self.table.players[self.deal.get_current_player()].change_bankroll(-self.small_blind)
-        # self.deal.move_pointer()
-        # self.deal.set_player_bet(self.deal.get_current_player(), self.big_blind)
-        # self.table.players[self.deal.get_current_player()].change_bankroll(-self.big_blind)
-        # self.deal.move_pointer()
-
-        # self.min_bet = 0
-
         for i in range(2):
             for player in self.table.players.values():
                 player.receive_card(self.table.deck.pop_card())
@@ -65,9 +39,6 @@ class Game:
         """Выкладывание на стол первых трёх карт"""
         # Сброс карты
         self.table.deck.pop_card()
-
-        # Установка минимальной ставки
-        # self.min_bet = 0
 
         for i in range(3):
             # Выкладывание карты на стол
@@ -78,9 +49,6 @@ class Game:
         # Сброс карты
         self.table.deck.pop_card()
 
-        # Установка минимальной ставки
-        # self.min_bet = 0
-
         # Выкладывание карты на стол
         self.table.board.append(self.table.deck.pop_card())
 
@@ -89,47 +57,32 @@ class Game:
         # Сброс карты
         self.table.deck.pop_card()
 
-        # Установка минимальной ставки
-        # self.min_bet = 0
-
         # Выкладывание карты на стол
         self.table.board.append(self.table.deck.pop_card())
 
     # Actions
-    def fold(self, player_id):
+    def fold(self, player_id: str):
         """
         Сброс своей руки игроком
         :param player_id: идентификатор игрока
         """
-        # self.table.players[player_id].set_empty_hand()
-        # self.table.set_active(player_id, False)
-        # self.table.delete_the_player()
-        # TODO: fix this
         del self.deal.players_bet[player_id]
         return self.table.delete_the_player(player_id)
 
-    def check(self, player_id):
+    def check(self, player_id: str):
         """Пропуск ставки игроком"""
-        # TODO: check if player can check...
         if self.deal.get_max_bet() > self.deal.get_player_bet(player_id):
-            # print("not checked")
             return False
+
         self.deal.finished_turn_players += 1
-        # print("checked")
         return True
 
-    def bet(self, player_id, bet_size):
+    def bet(self, player_id: str, bet_size: int):
         """
         Ставка игрока
         :param player_id: идентификатор игрока
         :param bet_size: размер ставки
         """
-        # Изменяем возможную минимальную ставку
-        # self.min_bet = bet_size
-        # Увиличиваем банк нна размер ставки
-        # self.table.increase_bank(bet_size)
-        # Вычитаем сумму ставки из банкролла игрока
-        # self.table.players[player_id].change_bankroll(-bet_size)
         if bet_size <= self.deal.get_max_bet():
             return False
 
@@ -137,27 +90,18 @@ class Game:
             return False
 
         self.deal.finished_turn_players = 1
-        # print(f'BET: {bet_size}')
         self.deal.set_player_bet(player_id, bet_size)
-        bet = self.deal.get_max_bet()
-        # print(f'BET: {bet}')
+
         return True
 
-    def call(self, player_id):
+    def call(self, player_id: str):
         """
         Ставка игрока
         :param player_id: идентификатор игрока
         :param bet_size: размер ставки
         """
-        # Изменяем возможную минимальную ставку
-        # self.min_bet = bet_size
-        # Увиличиваем банк нна размер ставки
-        # self.table.increase_bank(bet_size)
-        # Вычитаем сумму ставки из банкролла игрока
-        # self.table.players[player_id].change_bankroll(-bet_size)
-        # Увеличиваем количество сходивших игроков
-
         self.deal.finished_turn_players += 1
+
         bet = self.deal.get_max_bet()
         player_bankroll = self.table.players[player_id].bankroll
 
@@ -168,11 +112,14 @@ class Game:
             bet = player_bankroll
 
         self.deal.set_player_bet(player_id, bet)
+
         return True
 
     def round_end(self):
+        """Метод, выполнящий действия по окончании раунда"""
         for player in self.deal.players_order:
             bet = self.deal.get_player_bet(player)
+
             self.deal.set_player_bet(player, 0)
             self.table.players[player].change_bankroll(-bet)
             self.table.increase_bank(bet)
@@ -182,6 +129,7 @@ class Game:
         return False
 
     def betting_round(self):
+        """Метод, выполнящий действия в зависимости от раунда"""
         while not self.deal.is_all_players_finished():
             if len(self.table.players) < 2:
                 return 1
@@ -199,13 +147,18 @@ class Game:
             print(f"Current bank: {self.table.bank}")
             print(f"Current number of players: {len(self.table.players)}")
             print(f"Minimum bet: {self.deal.get_max_bet()}")
+
             # Print the hand
             print(f'Board: {[(card.value, card.suit) for card in self.table.board]}')
             print(f'Hand: {[(card.value, card.suit) for card in self.table.players[self.current_player_id].hand]}')
 
-
             # Сообщение, которое отправляем, а заодно и флаг
             method_with_args = ""
+
+            # Действие игрока и его аргументы
+            player_action = ''
+            player_bet = 0
+
             while len(method_with_args) <= 0:
                 # Получение данных о ходе
                 # Из ввода, если хожу я
@@ -214,22 +167,29 @@ class Game:
                     print("YOUR TURN!")
                     print(f'Your bet: {self.deal.get_player_bet(current_player)}')
                     print(f'Your bank: {self.table.players[current_player].bankroll}')
+
                     inpt = input()
                     if inpt:
                         player_move = inpt.split()
-                    player_action = player_move[0]
-                    player_bet = 0 if len(player_move) < 2 else int(player_move[1])
+                        player_action = player_move[0]
+                        player_bet = 0 if len(player_move) < 2 else int(player_move[1])
+
                 else:
                     print(f"Waiting for player's action: {current_player}")
+
                     player_move = self.data.get_action(current_player).split()
                     player_action = player_move[0]
+
                     to_print = f"\n|--> Player action: {player_action}"
+
                     args = player_move[1:]
                     player_bet = 0
+
                     if len(args) > 1:
                         args[1] = int(args[1])
                         player_bet = args[1]
                         to_print += f" {player_bet}"
+
                     print(to_print)
 
                 # Обрабатываем ход
@@ -245,18 +205,14 @@ class Game:
                 elif player_action == 'check':
                     if self.check(current_player):
                         method_with_args = f'check'
-                        # print("double checked")
                 elif player_action == 'delete':
                     is_move_ptr = self.table.delete_the_player(current_player)
                     method_with_args = f'delete {current_player}'
                 else:
                     print("Wrong action. Try again.")
 
-                # print("ACTION: {method_with_args}")
-
             # Посылаем всем, если мой ход
             if my_turn:
-                # print("SENDING ACTION")
                 self.data.send_action(method_with_args, current_player)
 
             # Если мы сфолдили, то мы все
@@ -264,10 +220,7 @@ class Game:
                 return -1
 
             if is_move_ptr:
-                # print("MOVING PTR")
                 self.deal.move_pointer()
-
-            # print(f"POINTER: {self.deal.player_pointer}")
 
         if self.round_end():
             return -1
@@ -277,6 +230,7 @@ class Game:
         return len(self.table.players_order)
 
     def __players_combinations(self):
+        """Метод, выставляющий сильнейшую комбинацию для каждого игрока"""
         players_combinations = {}
 
         for player in self.deal.players_order:
@@ -287,6 +241,7 @@ class Game:
         return players_combinations
 
     def define_the_winner(self):
+        """Метод, определяющий победителей"""
         players_combinations = self.__players_combinations()
 
         combinations_values = [combination_value[0] for combination_value in list(players_combinations.values())]
