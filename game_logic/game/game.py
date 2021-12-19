@@ -5,15 +5,16 @@ from game_logic.table.table import Table
 from game_logic.deal.deal import Deal
 from client_server.sharedData import SharedData
 
+from game_logic.combinations.combinations import get_strongest_combination
+
 
 class Game:
     """Класс игры"""
     def __init__(self, current_player_id: str, data: SharedData):
         """
         Конструктор класса игры
-        :param game_seed: seed для псевдорандомного генератора
-        :param players: список игроков
-        :param balance: начальный баланс игроков
+        :param current_player_id: id текущего игрока
+        :param data: клиентские данные для взаимодействия игроков
         """
         # Устанавливаем сид
         seed(data.seed)
@@ -43,7 +44,6 @@ class Game:
 
     #     # Создаём новую раздачу
     #     self.deal = Deal(self.table.players_order)
-
 
     # Phases
     def preflop(self):
@@ -94,7 +94,6 @@ class Game:
 
         # Выкладывание карты на стол
         self.table.board.append(self.table.deck.pop_card())
-
 
     # Actions
     def fold(self, player_id):
@@ -147,19 +146,37 @@ class Game:
         self.deal.set_player_bet(player_id, bet)
         return True
 
-    # Есть в Table
-    # def delete_bankrupts(self):
-    #     """Удаляем банкротов из игры"""
-    #     for player in self.table.players:
-    #         if player.is_bankrupt:
-    #             self.table.delete_the_player(player)
-
     def round_end(self):
         for player in self.deal.players_order:
             bet = self.deal.get_player_bet(player)
             self.deal.set_player_bet(player, 0)
             self.table.players[player].change_bankroll(-bet)
             self.table.increase_bank(bet)
+
+    def __current_player_turn_logic(self, current_player):
+        print(f'Hand: {[(card.value, card.suit) for card in self.table.players[current_player].hand]}')
+        print(f'Minimum bet: {max(self.deal.players_bet.values())}')
+        print(f'your bank: {self.table.players[current_player].bankroll}')
+
+        player_move = input().split()
+        return player_move[0], 0 if len(player_move) < 2 else int(player_move[1])
+
+    def __other_players_turn_logic(self, current_player):
+        print(f"Waiting for player's action: {current_player}")
+
+        player_move = self.data.get_action(current_player).split()
+        player_action = player_move[0]
+        to_print = f"Player action: {player_action}"
+
+        args = player_move[1:]
+        player_bet = 0
+        if len(args) > 1:
+            args[1] = int(args[1])
+            player_bet = args[1]
+            to_print += f" {player_bet}"
+        print(to_print)
+
+        return player_action, player_bet
 
     def betting_round(self):
         while not self.deal.is_all_players_finished():
@@ -168,9 +185,6 @@ class Game:
             # Я хожу или другой игрок?
             my_turn = current_player == self.current_player_id
 
-            # Переменные для обработки хода, заполняются дальше
-            player_action = ''
-            player_bet = 0
             # Нужно ли сдвигать  очердь хода?
             # Вообще нужно, если удалили игрока, то другая логика
             is_move_ptr = True
@@ -178,7 +192,6 @@ class Game:
             print(f"Current number of players: {len(self.table.players)}")
             # Print the hand
             print(f'board: {[(card.value, card.suit) for card in self.table.board]}')
-            
 
             # Сообщение, которое отправляем, а заодно и флаг
             method_with_args = ""
@@ -187,25 +200,9 @@ class Game:
                 # Из ввода, если хожу я
                 # От другого клиента, если хожу не я
                 if my_turn:
-                    print(f'Hand: {[(card.value, card.suit) for card in self.table.players[current_player].hand]}')
-                    print(f'Minimum bet: {max(self.deal.players_bet.values())}')
-                    print(f'your bank: {self.table.players[current_player].bankroll}')
-                    player_move = input().split()
-                    player_action = player_move[0]
-                    player_bet = 0 if len(player_move) < 2 else int(player_move[1])
+                    player_action, player_bet = self.__my_turn_logic(current_player)
                 else:
-                    print(f"Waiting for player's action: {current_player}")
-                    player_move = self.data.get_action(current_player).split()
-                    player_action = player_move[0]
-                    to_print = f"Player action: {player_action}"
-                    args = player_move[1:]
-                    player_bet = 0
-                    if len(args) > 1:
-                        args[1] = int(args[1])
-                        player_bet = args[1]
-                        to_print += f" {player_bet}"
-                    print(to_print)
-
+                    player_action, player_bet = self.__other_players_turn_logic(current_player)
 
                 # Обрабатываем ход
                 if player_action == 'call':
@@ -226,7 +223,6 @@ class Game:
                 else:
                     print("Wrong action. Try again.")
 
-
             # Посылаем всем, если мой ход
             if my_turn:
                 self.data.send_action(method_with_args, current_player)
@@ -238,3 +234,24 @@ class Game:
         self.deal.finished_turn_players = 0
 
         return len(self.table.players_order) > 1
+
+    def __players_combinations(self):
+        players_combinations = {}
+
+        for player in self.deal.players_order:
+            players_cards = self.table.players[player].hand + self.table.board
+
+            players_combinations[player] = get_strongest_combination(players_cards)
+
+        return players_combinations
+
+    def define_the_winner(self):
+        players_combinations = self.__players_combinations()
+
+        strongest_combination = max(players_combinations.values())
+
+        for key, value in players_combinations.items():
+            if value[0] < strongest_combination:
+                del players_combinations[key]
+
+        return players_combinations
