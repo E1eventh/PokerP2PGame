@@ -16,23 +16,26 @@ class Table:
         self.players = {player: Player(start_player_balance) for player in players}
         self.players_order = players
         self.deck = Deck(shuffle_func)
-        self.bank = self.set_empty_bank()
+        self.bank = 0
         self.board = []
-
-    @staticmethod
-    def set_empty_bank():
-        return 0
 
     def increase_bank(self, amount: int):
         self.bank += amount
 
     def move_players_order(self):
-        self.players_order.insert(len(self.players_order) - 1, self.players_order.pop(0))
+        tmp = self.players_order.pop(0)
+        self.players_order.append(tmp)
 
     def delete_the_player(self, player_index):
-        print(player_index)
+        need_move = False
+        # ValueIndex exception
+        idx = self.players_order.index(player_index)
+        if idx >= len(self.players_order):
+            need_move = True
         self.players_order.remove(player_index)
+        # TODO нужно удалять?
         del self.players[player_index]
+        return need_move
 
     def delete_bankrupts(self):
         for player in self.players.values():

@@ -24,53 +24,55 @@ if __name__ == "__main__":
 
 
   try:
-    # import sys, os
-    # from pathlib import Path
-
-    # from PySide6.QtQuick import QQuickView
-    # from PySide6 import QtCore
-    # from PySide6.QtGui import QGuiApplication, QIcon
-
-    # class Console(QtCore.QObject):
-    #     @QtCore.Slot(str)
-    #     def outputStr(self, s):
-    #         print(s)
-
-
-    # app = QGuiApplication(sys.argv)
-    # view = QQuickView()
-    # view.setResizeMode(QQuickView.SizeRootObjectToView)
-
-    # view.setMinimumWidth(900)
-    # view.setMinimumHeight(600)
-
-    # icon = QIcon("images/alice.jpg")
-    # view.setIcon(icon)
-    # view.setTitle("AlicePoker")
-
-    # qml_file = os.path.join(os.path.dirname(__file__), 'mainWindow.qml')
-    # view.setSource(QtCore.QUrl.fromLocalFile(os.path.abspath(qml_file)))
-
-    # con = Console()
-    # context = view.rootContext()
-    # context.setContextProperty("con", con)
-
-    # if view.status() == QQuickView.Error:
-    #     sys.exit(-1)
-    # view.show()
-
-    # app.exec()
-    # del view
-
-
     # TODO: pass only data object
-    game = Game(data.seed, data.players, data.balance, f'{address[0]}:{address[1]}', data)
+    game = Game(f'{address[0]}:{address[1]}', data)
 
     for street in ['preflop', 'flop', 'turn', 'river']:
-        print(street)
+        print(f'\n\n{street.capitalize()}')
+
+        print(f"Current bank: {game.table.bank}")
+        
+        # Fill the board
         game.__getattribute__(street)()
+
+        # Print the board
+        # for card in game.table.board:
+        #   print(card.value, card.suit)
+        
+        # Action
         game.betting_round()
-    game.start_new_deal()
+
+    # TODO: print winner
+    print("Who won?")
+    # game.start_new_deal()
+
+
+
+    # while True:
+    #   print("\n\nPreflop")
+    #   game.preflop()
+    #   res = game.betting_round
+    #   if not res:
+    #     break
+
+    #   print("\n\nFlop")
+    #   game.flop()
+    #   res = game.flop()
+    #   if not res:
+    #     break
+
+    #   print("\n\nTurn")
+    #   game.turn()
+    #   res = game.turn()
+    #   if not res:
+    #     break
+
+    #   print("\n\nRiver")
+    #   game.river()
+    #   res = game.river()
+    #   break
+
+
   except Exception as ex:
     print(str(ex))
     print(traceback.format_exc())
