@@ -30,7 +30,7 @@ class Game:
         # self.big_blind = int(data.balance / 100)
         # self.small_blind = int(self.big_blind / 2)
         # Минимальная возможная ставка
-        self.min_bet = 0
+        # self.min_bet = 0
         # self.min_bet = self.big_blind
 
     # def start_new_deal(self):
@@ -55,7 +55,7 @@ class Game:
         # self.table.players[self.deal.get_current_player()].change_bankroll(-self.big_blind)
         # self.deal.move_pointer()
 
-        self.min_bet = 0
+        # self.min_bet = 0
 
         for i in range(2):
             for player in self.table.players.values():
@@ -67,7 +67,7 @@ class Game:
         self.table.deck.pop_card()
 
         # Установка минимальной ставки
-        self.min_bet = 0
+        # self.min_bet = 0
 
         for i in range(3):
             # Выкладывание карты на стол
@@ -79,7 +79,7 @@ class Game:
         self.table.deck.pop_card()
 
         # Установка минимальной ставки
-        self.min_bet = 0
+        # self.min_bet = 0
 
         # Выкладывание карты на стол
         self.table.board.append(self.table.deck.pop_card())
@@ -90,7 +90,7 @@ class Game:
         self.table.deck.pop_card()
 
         # Установка минимальной ставки
-        self.min_bet = 0
+        # self.min_bet = 0
 
         # Выкладывание карты на стол
         self.table.board.append(self.table.deck.pop_card())
@@ -230,8 +230,8 @@ class Game:
                 # От другого клиента, если хожу не я
                 if my_turn:
                     print(f'Hand: {[(card.value, card.suit) for card in self.table.players[current_player].hand]}')
-                    print(f'Minimum bet: {max(self.deal.players_bet.values())}')
-                    print(f'your bank: {self.table.players[current_player].bankroll}')
+                    print(f'Your bet: {self.deal.get_player_bet(current_player)}')
+                    print(f'Your bank: {self.table.players[current_player].bankroll}')
                     player_move = input().split()
                     player_action = player_move[0]
                     player_bet = 0 if len(player_move) < 2 else int(player_move[1])
