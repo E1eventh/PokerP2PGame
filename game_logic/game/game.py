@@ -212,14 +212,14 @@ class Game:
                     method_with_args = f'delete {current_player}'
                 else:
                     print("Wrong action. Try again.")
-                print(f'Время, затраченное на обработку игровой логики активным игроком: '
+                print(f'Time to calculate logic: '
                       f'{default_timer() - your_action_time}')
 
             # Посылаем всем, если мой ход
             if my_turn:
                 send_action_time = default_timer()
                 self.data.send_action(method_with_args, current_player)
-                print(f'Время, затраченное на рассылку действий всем остальным игрокам: '
+                print(f'Time to send action to other peers: '
                       f'{default_timer() - send_action_time}')
 
             # Если мы сфолдили, то мы все

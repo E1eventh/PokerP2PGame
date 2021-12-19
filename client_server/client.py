@@ -114,7 +114,7 @@ class Client:
                 try:
                     ping_time = default_timer()
                     proxy.ping()
-                    print(f"Время, затрачиваемое на проверку соездинения с сервером: {default_timer() - ping_time}")
+                    print(f"Time to ping registration server: {default_timer() - ping_time}")
                     time.sleep(1)
                 except:
                     print('Connection lost')

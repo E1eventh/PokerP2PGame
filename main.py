@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
             winner_time_definition = default_timer()
             winner = game.define_the_winner()
-            print(f'Время определения победителя: {default_timer() - winner_time_definition}')
+            print(f'Time to calculate the winner: {default_timer() - winner_time_definition}')
             print(winner)
 
             print(f'board: {[(card.value, card.suit) for card in game.table.board]}')
