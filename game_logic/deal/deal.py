@@ -24,6 +24,10 @@ class Deal:
         """Метод, возВращающий True, если все игроки завершили ход"""
         return self.finished_turn_players == len(self.players_order)
 
+    def nullify_finished_turn_players(self):
+        """Метод, обнуляющий количество сходивших игроко"""
+        self.finished_turn_players = 0
+
     def set_player_bet(self, player_id, bet_size):
         """
         Метод, устанавливающий ставку, введённую игроком

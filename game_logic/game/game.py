@@ -1,4 +1,5 @@
 """System module."""
+from timeit import default_timer
 from random import seed, shuffle
 
 from game_logic.table.table import Table
@@ -192,6 +193,7 @@ class Game:
 
                     print(to_print)
 
+                your_action_time = default_timer()
                 # Обрабатываем ход
                 if player_action == 'call':
                     if self.call(current_player):
@@ -210,10 +212,15 @@ class Game:
                     method_with_args = f'delete {current_player}'
                 else:
                     print("Wrong action. Try again.")
+                print(f'Время, затраченное на обработку игровой логики активным игроком: '
+                      f'{default_timer() - your_action_time}')
 
             # Посылаем всем, если мой ход
             if my_turn:
+                send_action_time = default_timer()
                 self.data.send_action(method_with_args, current_player)
+                print(f'Время, затраченное на рассылку действий всем остальным игрокам: '
+                      f'{default_timer() - send_action_time}')
 
             # Если мы сфолдили, то мы все
             if self.current_player_id not in self.table.players:
@@ -225,7 +232,7 @@ class Game:
         if self.round_end():
             return -1
 
-        self.deal.finished_turn_players = 0
+        self.deal.nullify_finished_turn_players()
 
         return len(self.table.players_order)
 

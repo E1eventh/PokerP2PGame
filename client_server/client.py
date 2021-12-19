@@ -1,6 +1,7 @@
 from xmlrpc.server import SimpleXMLRPCServer
 from xmlrpc.server import SimpleXMLRPCRequestHandler
 from xmlrpc.client import ServerProxy
+from timeit import default_timer
 
 import xmlrpc.client
 import threading
@@ -111,7 +112,9 @@ class Client:
         try:
             while not self.data.is_playing:
                 try:
+                    ping_time = default_timer()
                     proxy.ping()
+                    print(f"Время, затрачиваемое на проверку соездинения с сервером: {default_timer() - ping_time}")
                     time.sleep(1)
                 except:
                     print('Connection lost')
