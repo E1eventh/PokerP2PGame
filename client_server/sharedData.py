@@ -2,7 +2,7 @@ from queue import Queue, Empty
 from xmlrpc.client import ServerProxy
 import time
 
-class Info:
+class SharedData:
     def __init__(self):
         self._seed = 0
         self._balance = 0
@@ -45,6 +45,7 @@ class Info:
 
     def ping(self):
         return True
+
 
     def start(self, seed, balance, players):
         self.seed = seed

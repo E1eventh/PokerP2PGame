@@ -3,12 +3,12 @@ from random import seed, shuffle
 
 from game_logic.table.table import Table
 from game_logic.deal.deal import Deal
-from client_server.info import Info
+from client_server.sharedData import SharedData
 
 
 class Game:
     """Класс игры"""
-    def __init__(self, game_seed: int, players: list[str], balance: int, current_player_id: str, info: Info):
+    def __init__(self, game_seed: int, players: list[str], balance: int, current_player_id: str, info: SharedData):
         """
         Конструктор класса игры
         :param game_seed: seed для псевдорандомного генератора
