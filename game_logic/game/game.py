@@ -181,7 +181,6 @@ class Game:
 
         return False
 
-
     def betting_round(self):
         while not self.deal.is_all_players_finished():
             if len(self.table.players) < 2:
@@ -196,10 +195,14 @@ class Game:
             # Вообще нужно, если удалили игрока, то другая логика
             is_move_ptr = True
 
+            print("\n")
+            print(f"Current bank: {self.table.bank}")
             print(f"Current number of players: {len(self.table.players)}")
-            print(f"MAX BET: {self.deal.get_max_bet()}")
+            print(f"Minimum bet: {self.deal.get_max_bet()}")
             # Print the hand
-            print(f'board: {[(card.value, card.suit) for card in self.table.board]}')
+            print(f'Board: {[(card.value, card.suit) for card in self.table.board]}')
+            print(f'Hand: {[(card.value, card.suit) for card in self.table.players[self.current_player_id].hand]}')
+
 
             # Сообщение, которое отправляем, а заодно и флаг
             method_with_args = ""
@@ -209,17 +212,18 @@ class Game:
                 # От другого клиента, если хожу не я
                 if my_turn:
                     print("YOUR TURN!")
-                    print(f'Hand: {[(card.value, card.suit) for card in self.table.players[current_player].hand]}')
                     print(f'Your bet: {self.deal.get_player_bet(current_player)}')
                     print(f'Your bank: {self.table.players[current_player].bankroll}')
-                    player_move = input().split()
+                    inpt = input()
+                    if inpt:
+                        player_move = inpt.split()
                     player_action = player_move[0]
                     player_bet = 0 if len(player_move) < 2 else int(player_move[1])
                 else:
                     print(f"Waiting for player's action: {current_player}")
                     player_move = self.data.get_action(current_player).split()
                     player_action = player_move[0]
-                    to_print = f"Player action: {player_action}"
+                    to_print = f"\n|--> Player action: {player_action}"
                     args = player_move[1:]
                     player_bet = 0
                     if len(args) > 1:
@@ -227,7 +231,6 @@ class Game:
                         player_bet = args[1]
                         to_print += f" {player_bet}"
                     print(to_print)
-
 
                 # Обрабатываем ход
                 if player_action == 'call':
@@ -261,10 +264,10 @@ class Game:
                 return -1
 
             if is_move_ptr:
-                print("MOVING PTR")
+                # print("MOVING PTR")
                 self.deal.move_pointer()
 
-            print(f"POINTER: {self.deal.player_pointer}")
+            # print(f"POINTER: {self.deal.player_pointer}")
 
         if self.round_end():
             return -1
@@ -286,10 +289,18 @@ class Game:
     def define_the_winner(self):
         players_combinations = self.__players_combinations()
 
-        strongest_combination = max(players_combinations.values())
+        combinations_values = [combination_value[0] for combination_value in list(players_combinations.values())]
+
+        strongest_combination = max(combinations_values)
+
+        not_strongest_players = []
 
         for key, value in players_combinations.items():
             if value[0] < strongest_combination:
-                del players_combinations[key]
+                not_strongest_players.append(key)
+
+        for player in not_strongest_players:
+            print(player)
+            del players_combinations[player]
 
         return players_combinations

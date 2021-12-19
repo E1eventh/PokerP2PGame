@@ -37,8 +37,6 @@ if __name__ == "__main__":
         for street in ['preflop', 'flop', 'turn', 'river']:
             print(f'\n\n{street.capitalize()}')
 
-            print(f"Current bank: {game.table.bank}")
-
             # Fill the board
             game.__getattribute__(street)()
 
@@ -48,45 +46,21 @@ if __name__ == "__main__":
 
             # Action
             res = game.betting_round()
-            if res < 0:
+            if res < 2:
                 break
 
         # TODO: print winner
         if res < 0:
             print("You lose!")
         else:
-            print("Who won?")
-
-        print(game.define_the_winner())
-        # game.start_new_deal()
-
-        # while True:
-        #   print("\n\nPreflop")
-        #   game.preflop()
-        #   res = game.betting_round
-        #   if not res:
-        #     break
-
-        #   print("\n\nFlop")
-        #   game.flop()
-        #   res = game.flop()
-        #   if not res:
-        #     break
-
-        #   print("\n\nTurn")
-        #   game.turn()
-        #   res = game.turn()
-        #   if not res:
-        #     break
-
-        #   print("\n\nRiver")
-        #   game.river()
-        #   res = game.river()
-        #   break
-
-    except Exception as ex:
-        print(str(ex))
-        print(traceback.format_exc())
+            print("Winner:")
+            winner = game.define_the_winner()
+            print(winner)
+            print(f'board: {[(card.value, card.suit) for card in game.table.board]}')
+            tmp = list(winner.keys())[0]
+            print(f'Hand: {[(card.value, card.suit) for card in game.table.players[tmp].hand]}')
+    except KeyboardInterrupt as ki:
+        print(str(ki))
     finally:
         peer.close()
         print("END")
