@@ -6,7 +6,6 @@ import traceback
 from client_server.client import Client
 from game_logic.game.game import Game
 
-
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Example: python сlient.py <port_number>")
@@ -23,16 +22,21 @@ if __name__ == "__main__":
     print("Ready to play")
 
     try:
-        # Убрать блайнды
+
+        # Убрать блайнды +
         # Fold - не падать - для игрока - конец игры (можно наблюдать)
         # Raise n - поднять свою ставку до n
         # Check - нельзя чекать, если твоя ставка не равна максимальной
         # Call - убрать аргументы - сравнивает текущую ставку с максимальной
 
+        # FOLD ПАДАЕТ
+
         game = Game(f'{address[0]}:{address[1]}', data)
 
+        res = 0
         for street in ['preflop', 'flop', 'turn', 'river']:
             print(f'\n\n{street.capitalize()}')
+
             print(f"Current bank: {game.table.bank}")
 
             # Fill the board
@@ -43,10 +47,16 @@ if __name__ == "__main__":
             #   print(card.value, card.suit)
 
             # Action
-            game.betting_round()
+            res = game.betting_round()
+            if res < 0:
+                break
 
         # TODO: print winner
-        print("Who won?")
+        if res < 0:
+            print("You lose!")
+        else:
+            print("Who won?")
+
         print(game.define_the_winner())
         # game.start_new_deal()
 
@@ -73,7 +83,6 @@ if __name__ == "__main__":
         #   game.river()
         #   res = game.river()
         #   break
-
 
     except Exception as ex:
         print(str(ex))

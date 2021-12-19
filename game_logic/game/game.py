@@ -31,7 +31,7 @@ class Game:
         # self.big_blind = int(data.balance / 100)
         # self.small_blind = int(self.big_blind / 2)
         # Минимальная возможная ставка
-        self.min_bet = 0
+        # self.min_bet = 0
         # self.min_bet = self.big_blind
 
     # def start_new_deal(self):
@@ -55,7 +55,7 @@ class Game:
         # self.table.players[self.deal.get_current_player()].change_bankroll(-self.big_blind)
         # self.deal.move_pointer()
 
-        self.min_bet = 0
+        # self.min_bet = 0
 
         for i in range(2):
             for player in self.table.players.values():
@@ -67,7 +67,7 @@ class Game:
         self.table.deck.pop_card()
 
         # Установка минимальной ставки
-        self.min_bet = 0
+        # self.min_bet = 0
 
         for i in range(3):
             # Выкладывание карты на стол
@@ -79,7 +79,7 @@ class Game:
         self.table.deck.pop_card()
 
         # Установка минимальной ставки
-        self.min_bet = 0
+        # self.min_bet = 0
 
         # Выкладывание карты на стол
         self.table.board.append(self.table.deck.pop_card())
@@ -90,7 +90,7 @@ class Game:
         self.table.deck.pop_card()
 
         # Установка минимальной ставки
-        self.min_bet = 0
+        # self.min_bet = 0
 
         # Выкладывание карты на стол
         self.table.board.append(self.table.deck.pop_card())
@@ -102,15 +102,20 @@ class Game:
         :param player_id: идентификатор игрока
         """
         # self.table.players[player_id].set_empty_hand()
-        self.table.set_active(player_id, False)
+        # self.table.set_active(player_id, False)
+        # self.table.delete_the_player()
         # TODO: fix this
-        # self.table.delete_the_player(self.table.players[player_id])
+        self.table.delete_the_player(player_id)
         return True
 
     def check(self, player_id):
         """Пропуск ставки игроком"""
         # TODO: check if player can check...
+        if self.deal.get_max_bet() != self.deal.get_player_bet(player_id):
+            # print("not checked")
+            return False
         self.deal.finished_turn_players += 1
+        # print("checked")
         return True
 
     def bet(self, player_id, bet_size):
@@ -125,7 +130,17 @@ class Game:
         # self.table.increase_bank(bet_size)
         # Вычитаем сумму ставки из банкролла игрока
         # self.table.players[player_id].change_bankroll(-bet_size)
+        if bet_size <= self.deal.get_max_bet():
+            return False
+
+        if self.table.players[player_id].bankroll < bet_size:
+            return False
+
+        self.deal.finished_turn_players = 1
+        # print(f'BET: {bet_size}')
         self.deal.set_player_bet(player_id, bet_size)
+        bet = self.deal.get_max_bet()
+        # print(f'BET: {bet}')
         return True
 
     def call(self, player_id):
@@ -140,23 +155,48 @@ class Game:
         # self.table.increase_bank(bet_size)
         # Вычитаем сумму ставки из банкролла игрока
         # self.table.players[player_id].change_bankroll(-bet_size)
-        # Увиличиваем количество сходивших игроков
+        # Увеличиваем количество сходивших игроков
+
         self.deal.finished_turn_players += 1
         bet = self.deal.get_max_bet()
+        player_bankroll = self.table.players[player_id].bankroll
+
+        if bet <= 0:
+            return False
+
+        if player_bankroll < bet:
+            bet = player_bankroll
+
         self.deal.set_player_bet(player_id, bet)
         return True
 
     def round_end(self):
+        # Если мы сфолдили, то мы все
+        if not self.table.is_active(self.current_player_id):
+            return True
+
+        # Если мы не сфолдили, то на остальных смотрим
+        # tmp = []
         for player in self.deal.players_order:
             bet = self.deal.get_player_bet(player)
             self.deal.set_player_bet(player, 0)
             self.table.players[player].change_bankroll(-bet)
             self.table.increase_bank(bet)
+            # if not self.table.is_active(player):
+            #     tmp.append()
+
+        # for p in tmp:
+        #     if self.table.delete_the_player(p):
+        #         self.deal.move_pointer()
+
+        self.deal.player_pointer = 0
+
+        return False
 
     def __current_player_turn_logic(self, current_player):
         print(f'Hand: {[(card.value, card.suit) for card in self.table.players[current_player].hand]}')
-        print(f'Minimum bet: {max(self.deal.players_bet.values())}')
-        print(f'your bank: {self.table.players[current_player].bankroll}')
+        print(f'Your bet: {self.deal.get_player_bet(current_player)}')
+        print(f'Your bank: {self.table.players[current_player].bankroll}')
 
         player_move = input().split()
         return player_move[0], 0 if len(player_move) < 2 else int(player_move[1])
@@ -190,6 +230,7 @@ class Game:
             is_move_ptr = True
 
             print(f"Current number of players: {len(self.table.players)}")
+            print(f"MAX BET: {self.deal.get_max_bet()}")
             # Print the hand
             print(f'board: {[(card.value, card.suit) for card in self.table.board]}')
 
@@ -217,23 +258,29 @@ class Game:
                 elif player_action == 'check':
                     if self.check(current_player):
                         method_with_args = f'check'
+                        # print("double checked")
                 elif player_action == 'delete':
                     is_move_ptr = self.table.delete_the_player(current_player)
                     method_with_args = f'delete {current_player}'
                 else:
                     print("Wrong action. Try again.")
 
+                # print("ACTION: {method_with_args}")
+
             # Посылаем всем, если мой ход
             if my_turn:
+                # print("SENDING ACTION")
                 self.data.send_action(method_with_args, current_player)
             if is_move_ptr:
+                # print("MOVING PTR")
                 self.deal.move_pointer()
 
-            self.round_end()
+        if self.round_end():
+            return -1
 
         self.deal.finished_turn_players = 0
 
-        return len(self.table.players_order) > 1
+        return len(self.table.players_order)
 
     def __players_combinations(self):
         players_combinations = {}
